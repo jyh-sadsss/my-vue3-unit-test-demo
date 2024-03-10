@@ -52,3 +52,4 @@ npm run lint
 ```
 
 /query/:id 用this.$router.id获取
+vue3 vue-router、api部分学习
