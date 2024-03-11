@@ -8,7 +8,10 @@
         <router-link :to="{ name: 'home-parent' }">home(首页)命令路由</router-link>
         <RouterLink to="/home">首页</RouterLink>
         <RouterLink to="/home/about">首页-关于</RouterLink>
-        <router-link to="/router-view/demo1">命名路由</router-link>
+        <RouterLink to="/router-view/demo1">命名路由</RouterLink>
+        <RouterLink to="/alias/1">别名1（测试onBeforeRouteUpdate）</RouterLink>
+        <RouterLink to="/useLink">useLink使用场景</RouterLink>
+        <RouterLink to="/tab">Tab测试页面</RouterLink>
         <RouterLink
           :to="{
             // to和router.push的规则是相同的

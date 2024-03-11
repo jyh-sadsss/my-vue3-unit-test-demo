@@ -15,19 +15,46 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 const account = ref<string>('')
 const password = ref<string>('')
+const timer = ref(10)
+const isLoading = ref(false) // 是否正在加载异步组件
 
 const router = useRouter()
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false //加载完成
+    startTimer()
+  }, 2000)
+})
+
+function startTimer() {
+  let timerId: ReturnType<typeof setInterval> | null = null
+  timerId = setInterval(() => {
+    timer.value--
+  }, 1000)
+  onUnmounted(() => {
+    console.log('定时器被清除')
+    clearInterval(timerId)
+  })
+}
+
+function setData() {
+  console.log('获得快乐')
+}
 
 function login() {
   console.log('account', account.value)
   console.log('password', password.value)
-  if(account.value === 'admin' && password.value === '123456') {
+  if (account.value === 'admin' && password.value === '123456') {
     // 登录成功
-    widow.localStorage.setItem('userInfo', JSON.stringify({ account: account.value, password: password.value }))
+    window.localStorage.setItem(
+      'userInfo',
+      JSON.stringify({ account: account.value, password: password.value })
+    )
     router.push('/')
   }
 }

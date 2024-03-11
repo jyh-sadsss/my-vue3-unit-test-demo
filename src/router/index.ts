@@ -10,6 +10,7 @@ import RouterViewLayout from '../components/RouterViewLayout.vue'
 import HeaderCom from '../components/RouterView/HeaderCom.vue'
 import FooterCom from '../components/RouterView/FooterCom.vue'
 import AliasLayout from '../components/RouterView/AliasLayout.vue'
+import TabLayout from '../components/TabLayout.vue'
 import LoginAccess from '../views/Router/Login/AccessView.vue'
 
 const router = createRouter({
@@ -25,7 +26,10 @@ const router = createRouter({
     {
       path: '/alias',
       component: () => import('../views/Router/RouterView/AliasHomeView.vue'),
-      alias: ['/alias-home', '/alias-demo'] // / alias、/alias-home、/alias-demo渲染的都是同一个组件
+      alias: ['/alias-home', '/alias-demo'], // / alias、/alias-home、/alias-demo渲染的都是同一个组件
+      meta: {
+        requireAuth: false // 不需要登录就能访问的页面
+      }
     },
     {
       path: '/alias/:pageId',
@@ -34,7 +38,10 @@ const router = createRouter({
         {
           path: 'page',
           component: () => import('../views/Router/RouterView/AliasPageIdView.vue'),
-          alias: ['/:pageId', '']
+          alias: ['/:pageId', ''],
+          meta: {
+            requireAuth: false
+          }
         }
       ]
     },
@@ -117,6 +124,51 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginAccess,
+      meta: {
+        // 元信息
+        title: '登录页面'
+      },
+      beforeEnter: (to, from, next) => {
+        console.log('Login 组件内的守卫', to) // 会在全局beforeResolve之前执行
+        next((vm) => {
+          vm.setData() // vm: Login组件实例，执行实例setData方法
+        })
+      }
+    },
+    {
+      path: '/useLink',
+      name: 'useLink',
+      component: () => import('../views/Router/useLinkView.vue')
+    },
+    {
+      path: '/tab',
+      component: TabLayout,
+      name: 'tab',
+      meta:{
+        transitionName: 'fade',
+      },
+      props: {
+        tabList: [
+          {
+            key: 'page1',
+            title: '页面1',
+            active: true,
+            backgroundColor: 'pink'
+          },
+          {
+            key: 'page2',
+            title: '页面2',
+            active: false,
+            backgroundColor: 'orange'
+          },
+          {
+            key: 'page3',
+            title: '页面3',
+            active: false,
+            backgroundColor: 'skyblue'
+          }
+        ]
+      }
     },
     {
       path: '/:pathMatch(.*)*',
@@ -130,10 +182,11 @@ const router = createRouter({
     }
   ]
 })
-router.beforeEach(async (to, from) => {
+router.beforeEach(async (to) => {
   const userInfo = JSON.parse(window.localStorage.getItem('userInfo'))
   const isAccessed = userInfo && userInfo.account === 'admin' && userInfo.password === '123456'
-  if(to.path !=='/login' && !isAccessed) {
+  console.log('登录信息', to)
+  if (to.meta.requireAuth !== false && to.path !== '/login' && !isAccessed) {
     return '/login'
   }
 })
@@ -149,8 +202,13 @@ router.beforeEach(async (to, from) => {
 //   next()
 // })
 
-// router.beforeResolve(async (to, from)=>{
-//   console.log('beforeResolve', to, from)
-// })
+router.beforeResolve(async (to, from) => {
+  console.log('beforeResolve', to, from) // beforeEach和beforeResolve的区别：beforeResolve会等待异步组件或者组件内的异步请求完成
+})
+
+// 设置标题
+router.afterEach((to, from, failure) => {
+  document.title = to.meta.title || 'vue3 demo'
+})
 
 export default router

@@ -18,6 +18,7 @@ const user = reactive<{
   userId: ''
 })
 watch( // watch 初始是不执行的，只有在路由变化之后才执行，如果立即执行，设置immediate
+// route整个对象都是响应式的，任何属性都是可以被监听的，但是我们最好不要监听整个的route
   () => ({
     userName: route.query.userName,
     userId: route.params.userId

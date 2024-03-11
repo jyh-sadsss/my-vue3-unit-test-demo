@@ -18,6 +18,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+
 const props = defineProps<{userId: string}>()
 const userId = props.userId
 
