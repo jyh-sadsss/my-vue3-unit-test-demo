@@ -2,10 +2,6 @@
   <div>点击下面的链接跳转到首页</div>
 </template>
 <script setup lang="ts">
-import { useLink } from 'vue-router'
-const props = defineProps<{}>()
-const link = useLink({
-  to: "/"
-}) // useLink(to, activeClass, extraActvieClass)
-console.log(link.route)
+
+// RouterLink 常设置的属性：to、activeClass、exact、replace、exactActiveClass、inactiveClass
 </script>

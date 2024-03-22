@@ -12,9 +12,24 @@ import FooterCom from '../components/RouterView/FooterCom.vue'
 import AliasLayout from '../components/RouterView/AliasLayout.vue'
 import TabLayout from '../components/TabLayout.vue'
 import LoginAccess from '../views/Router/Login/AccessView.vue'
+import AppLink from '../views/Router/Link/AppLink.vue'
+import DynamicAbout from '../views/Router/dynamic/AboutView.vue'
+import DynamicOther from '../views/Router/dynamic/OtherView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    // savedPosition 按照浏览器的前进/后退行为
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth'
+      }
+    }
+    return {
+      top: 0
+    }
+  },
   routes: [
     {
       path: '/', // 这个路由导航守卫根本没用
@@ -144,8 +159,8 @@ const router = createRouter({
       path: '/tab',
       component: TabLayout,
       name: 'tab',
-      meta:{
-        transitionName: 'fade',
+      meta: {
+        transitionName: 'fade' // 在单个路由下面添加过渡动画类型
       },
       props: {
         tabList: [
@@ -171,6 +186,21 @@ const router = createRouter({
       }
     },
     {
+      path: '/anchor',
+      name: 'anchor',
+      component: () => import('../views/Router/AnchorView.vue')
+    },
+    {
+      path: '/app-link',
+      name: 'appLink',
+      component: AppLink
+    },
+    // 动态路由配置
+    {
+      path: '/dynamic/:path',
+      component: () => import('../views/Router/Dynamic/ContentView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: NotFound
@@ -183,14 +213,32 @@ const router = createRouter({
   ]
 })
 router.beforeEach(async (to) => {
+  // 添加新路由，并跳转新路由
+  // 获取全部路由：router.getRoutes()
+  // 判断一个路由是否存在：router.hasRoute(routerName)
+  // 添加一个嵌套路由
+  if (!router.hasRoute('dynamic-add') && to.path === '/dynamic/add/store') {
+    router.addRoute({ name: 'dynamic-add', path: '/dynamic/add', component: UserLayout })
+    router.addRoute('dynamic-add', {
+      path: 'store',
+      component: () => import('../views/Router/dynamic/StoreView.vue')
+    })
+    return to.path;
+  }
+  if (!router.hasRoute('dynamic-about') && to.path === '/dynamic/about') {
+    router.addRoute({ path: '/dynamic/about', name: 'dynamic-about', component: DynamicAbout })
+    // 删除路由的第一种方法
+    // 再添加一个路由，这样会删除之前已经添加的路由，覆盖之前的路由
+    // router.addRoute({path: '/dynamic/other', name: 'dynamic-about', component: DynamicOther})
+    return to.path
+    // 原本第一次跳转到该地址，会展示ContentView组件，在contentView组件执行router.replace(router.currentRoute.value.fullPath)，这样第一次就能渲染正确的组件
+  }
   const userInfo = JSON.parse(window.localStorage.getItem('userInfo'))
   const isAccessed = userInfo && userInfo.account === 'admin' && userInfo.password === '123456'
-  console.log('登录信息', to)
   if (to.meta.requireAuth !== false && to.path !== '/login' && !isAccessed) {
     return '/login'
   }
 })
-
 // 如果回调参数中写了next，那么一定要使用next调用，上述方法等同于
 // router.beforeEach(async (to, from, next) => { // 如果使用了next，next在任何给定的导航守卫中都要被执行一次
 //   // next({name: 'login'}) 拦截跳转到新的地址
@@ -208,7 +256,14 @@ router.beforeResolve(async (to, from) => {
 
 // 设置标题
 router.afterEach((to, from, failure) => {
+  if (failure) {
+    // 全局的导航错误
+  }
   document.title = to.meta.title || 'vue3 demo'
+  // 根据深度动态添加信息到meta字段
+  const toPath = to.path.split('/').length
+  const fromPath = from.path.split('/').length
+  to.meta.transitionName = toPath > fromPath ? 'slide-right' : 'slide-left'
 })
 
 export default router

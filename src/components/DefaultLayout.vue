@@ -12,6 +12,11 @@
         <RouterLink to="/alias/1">别名1（测试onBeforeRouteUpdate）</RouterLink>
         <RouterLink to="/useLink">useLink使用场景</RouterLink>
         <RouterLink to="/tab">Tab测试页面</RouterLink>
+        <RouterLink to="/anchor#content">锚点定位</RouterLink>
+        <RouterLink to="/app-link">拓展RouterLink</RouterLink>
+        <RouterLink to="/dynamic/about">dynamic about</RouterLink>
+        <RouterLink to="/dynamic/other">dynamic other</RouterLink>
+        <RouterLink to="/dynamic/add/store">dynamic store</RouterLink>
         <RouterLink
           :to="{
             // to和router.push的规则是相同的
@@ -36,7 +41,12 @@
     </div>
   </header>
 
-  <RouterView />
+  <RouterView v-slot="{Component, route }">
+    <Transition :name="route.meta.transitionName || 'fade'">
+      <Component :is="Component" :key="route.path" />
+    </Transition>
+  </RouterView>
+
 </template>
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from 'vue-router'
